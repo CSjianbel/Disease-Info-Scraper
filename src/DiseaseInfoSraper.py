@@ -14,6 +14,7 @@ class DiseaseInfoScraper:
     def get_diseases(self)  -> dict['disease': dict['information': str]]:
         diseases_info = dict()
         for disease in self.diseases:
+            print(f"Getting Information about {disease}...")
             diseases_info[disease] = self.get_disease(disease)
         return diseases_info
 
@@ -21,14 +22,13 @@ class DiseaseInfoScraper:
         disease_page = self.search_disease(disease)
         diagnosis_treatment_page = self.get_diagnosis_treatment_page(disease_page)
         return {
-            # 'overview': self.get_overview(disease_page),
-            # 'symptoms': self.get_symptoms(disease_page),
-            # TODO
-            # 'causes': self.get_causes(disease_page),
-            # 'risk_factors': self.get_risk_factors(disease_page),
-            # 'complications': self.get_complications(disease_page),
+            'overview': self.get_overview(disease_page),
+            'symptoms': self.get_symptoms(disease_page),
+            'causes': self.get_causes(disease_page),
+            'risk_factors': self.get_risk_factors(disease_page),
+            'complications': self.get_complications(disease_page),
             # 'prevention': self.get_prevention(disease_page),
-            # 'diagnosis': self.get_diagnosis(diagnosis_treatment_page),
+            'diagnosis': self.get_diagnosis(diagnosis_treatment_page),
             'treatment': self.get_treatment(diagnosis_treatment_page),
         }
 
@@ -83,10 +83,10 @@ class DiseaseInfoScraper:
                 causes_info.append(current.text)
             current = current.find_next_sibling()
 
-        return ' '.join(causes_info)
+        return '\n'.join(causes_info)
 
 
-    def get_risk_factors(self, disease_page: BeautifulSoup):
+    def get_risk_factors(self, disease_page: BeautifulSoup) -> list[str]:
         risk_factors = disease_page.find(string='Risk factors', name='h2')
 
         if not risk_factors:
@@ -97,7 +97,7 @@ class DiseaseInfoScraper:
 
         return [risk.text for risk in risk_factors.findAll(name='li')]
 
-    def get_complications(self, disease_page: BeautifulSoup):
+    def get_complications(self, disease_page: BeautifulSoup) -> str:
         complications = disease_page.find(string='Complications', name='h2')
 
         if not complications:
@@ -110,7 +110,35 @@ class DiseaseInfoScraper:
                 complications_info.append(current.text)
             current = current.find_next_sibling()
 
-        return ' '.join(complications_info) 
+        return '\n'.join(complications_info) 
+
+    def get_diagnosis_treatment_page(self, disease_page: BeautifulSoup) -> BeautifulSoup:
+        link = disease_page.find(class_='sectionnav').find(name='a').get('href')
+        response = requests.get(self.site_link + link, headers=self.headers)
+        return BeautifulSoup(response.text, 'html.parser')
+
+    def get_diagnosis(self, diagnosis_treatment_page: BeautifulSoup) -> str:
+        diagnosis = diagnosis_treatment_page.find(string='Diagnosis', name='h2')
+
+        diagnosis_info = []
+        current = diagnosis.find_next_sibling()
+        while current.name != 'h2': 
+            if current.text != '':
+                diagnosis_info.append(current.text)
+            current = current.find_next_sibling()
+        return '\n'.join(diagnosis_info)
+
+
+    def get_treatment(self, diagnosis_treatment_page: BeautifulSoup) -> str:
+        treatment = diagnosis_treatment_page.find(string='Treatment', name='h2')
+
+        treatment_info = []
+        current = treatment.find_next_sibling()
+        while current.name in ['p', 'h3', 'ul', 'li']:
+            if current.text != '':
+                treatment_info.append(current.text)
+            current = current.find_next_sibling()
+        return '\n'.join(treatment_info)
 
     # def get_prevention(self, disease_page: BeautifulSoup):
     #     prevention = disease_page.find(string='Prevention', name='h2')
@@ -127,41 +155,13 @@ class DiseaseInfoScraper:
 
     #     return '\n'.join(prevention_info) 
 
-    def get_diagnosis_treatment_page(self, disease_page: BeautifulSoup) -> BeautifulSoup:
-        link = disease_page.find(class_='sectionnav').find(name='a').get('href')
-        response = requests.get(self.site_link + link, headers=self.headers)
-        return BeautifulSoup(response.text, 'html.parser')
+scraper = DiseaseInfoScraper(['dengue', 'drug allergy'])
+diseases = scraper.get_diseases()
 
-    def get_diagnosis(self, diagnosis_treatment_page: BeautifulSoup):
-        diagnosis = diagnosis_treatment_page.find(string='Diagnosis', name='h2')
-
-        diagnosis_info = []
-        current = diagnosis.find_next_sibling()
-        while current.name != 'h2': 
-            if current.text != '':
-                diagnosis_info.append(current.text)
-            current = current.find_next_sibling()
-        return '\n'.join(diagnosis_info)
-
-
-    def get_treatment(self, diagnosis_treatment_page: BeautifulSoup):
-        treatment = diagnosis_treatment_page.find(string='Treatment', name='h2')
-
-        treatment_info = []
-        current = treatment.find_next_sibling()
-        while current.name != 'h2':
-            if current.text != '':
-                treatment_info.append(current.text)
-            current = current.find_next_sibling()
-        return '\n'.join(treatment_info)
-
-# scraper = DiseaseInfoScraper(['dengue', 'drug allergy'])
-
-# diseases = scraper.get_diseases()
-
-# for disease in diseases:
-#     print(disease.upper(), ': ', sep='')
-#     for key in diseases[disease]:
-#         print(key.upper(), ': ', diseases[disease][key], sep='')
-#         print()
-#     print()
+for disease in diseases: 
+    print(disease.upper(), ': ', sep='')
+    for key in diseases[disease]:
+        print(key, ': ', sep='')
+        print(diseases[disease][key])
+        print()
+    print()
