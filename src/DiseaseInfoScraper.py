@@ -7,11 +7,13 @@ class DiseaseInfoScraper:
         self.site_link = 'https://www.mayoclinic.org/'
         self.diseases = diseases
 
+        # Headers for each request
+        # Used to simulate a person making requests on the website instead of a program
         self.headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
         }
 
-    def get_diseases(self)  -> dict['disease': dict['information': str]]:
+    def get_diseases(self)  -> dict['disease': dict]:
         try: 
             diseases_info = dict()
             for disease in self.diseases:
@@ -170,18 +172,3 @@ class DiseaseInfoScraper:
             return '\n'.join(treatment_info)
         except:
             return None
-
-    # def get_prevention(self, disease_page: BeautifulSoup):
-    #     prevention = disease_page.find(string='Prevention', name='h2')
-
-    #     if not prevention:
-    #         return None
-
-    #     prevention_info = []
-    #     current = prevention.find_next_sibling()
-    #     while current.get('class') != 'sub':
-    #         if current.text != '':
-    #             prevention_info.append(current.text)
-    #         current = current.find_next_sibling()
-
-    #     return '\n'.join(prevention_info) 
