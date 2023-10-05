@@ -51,9 +51,9 @@ class DiseaseDB:
         return all(disease[info] for info in disease)
     
     def fetch_disease(self, disease: str) -> tuple:
-        fetch_statement = f'SELECT * FROM diseases WHERE disease_name={disease}'
+        fetch_statement = 'SELECT * FROM diseases WHERE disease_name=?'
         cur = self.conn.cursor()
-        res = cur.execute(fetch_statement)
+        res = cur.execute(fetch_statement, (disease,))
         return res.fetchone()
 
     def fetch_diseases(self) -> list[tuple]:
