@@ -64,7 +64,7 @@ class DiseaseInfoScraper:
 
             while 'acces-list-container' not in (current.get('class') if current.get('class') else []):
                 if current.text != '':
-                    information.append(current.text)
+                    information.append(current.text.strip())
                 current = current.find_next_sibling()
 
             return ' '.join(information)
@@ -79,7 +79,7 @@ class DiseaseInfoScraper:
             while symptoms.name != 'ul':
                 symptoms = symptoms.find_next_sibling() 
         
-            return '\n'.join([symptom.text for symptom in symptoms.findAll(name='li')])
+            return '\n'.join([symptom.text.strip() for symptom in symptoms.findAll(name='li')])
         except:
             return None
 
@@ -95,7 +95,7 @@ class DiseaseInfoScraper:
             current = causes.find_next_sibling()
             while current.name == 'p':
                 if current.text != '':
-                    causes_info.append(current.text)
+                    causes_info.append(current.text.strip())
                 current = current.find_next_sibling()
 
             return '\n'.join(causes_info)
@@ -110,7 +110,7 @@ class DiseaseInfoScraper:
             while risk_factors.name != 'ul':
                 risk_factors = risk_factors.find_next_sibling()
 
-            return '\n'.join([risk.text for risk in risk_factors.findAll(name='li')])
+            return '\n'.join([risk.text.strip() for risk in risk_factors.findAll(name='li')])
         except:
             return None
 
@@ -126,7 +126,7 @@ class DiseaseInfoScraper:
             current = complications.find_next_sibling()
             while current.name == 'p':
                 if current.text != '':
-                    complications_info.append(current.text)
+                    complications_info.append(current.text.strip())
                 current = current.find_next_sibling()
 
             return '\n'.join(complications_info) 
@@ -150,7 +150,7 @@ class DiseaseInfoScraper:
             current = diagnosis.find_next_sibling()
             while current.name != 'h2': 
                 if current.text != '':
-                    diagnosis_info.append(current.text)
+                    diagnosis_info.append(current.text.strip())
                 current = current.find_next_sibling()
             return '\n'.join(diagnosis_info)
         except:
@@ -167,7 +167,7 @@ class DiseaseInfoScraper:
             current = treatment.find_next_sibling()
             while current.name in ['p', 'h3', 'ul', 'li']:
                 if current.text != '':
-                    treatment_info.append(current.text)
+                    treatment_info.append(current.text.strip())
                 current = current.find_next_sibling()
             return '\n'.join(treatment_info)
         except:
